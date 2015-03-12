@@ -1,0 +1,85 @@
+Qu'est-ce que c'est qu'une extension ?[edit | edit source]
+MediaWiki extensions
+Les extensions vous permettent de personnaliser l'apparence et la façon de travailler de MediaWiki.
+
+Les utilisateurs wiki peuvent rechercher parmi les extensions existantes ou bien demander une nouvelle extension{{{2}}}. Les administrateurs système peuvent installer (ou désinstaller) des extensions sur les systèmes MediaWiki qu'ils gèrent. Les développeurs peuvent écrire de nouvelles extensions{{{2}}} ou bien améliorer/maintenir des extensions existantes.
+
+Recherchez les extensions par mot(s)-clé(s) :
+
+ 
+Contents  [hide] 
+1 Qu'est-ce que c'est qu'une extension ?
+2 Navigation dans les extensions
+3 Vérification des extensions installées
+4 Installation d'une extension
+5 Mise à jour d'une extension
+6 Suppression d'une extension
+7 Développement d'extensions
+8 Voir aussi
+En fonction de vos objectifs, vous pouvez utiliser des extensions pour :
+
+étendre la syntaxe wiki pour écrire des articles - consultez les catégories extensions des fonctions parseur et extensions parseur pour avoir des exemples.
+ajouter des nouvelles possibilités au niveau reporting et administration - consultez la catégorie extensions pages spéciales pour avoir des exemples.
+changer l'apparence du logiciel - consultez la galerie des styles utilisateur{{{2}}} et la catégorie extensions interface utilisateur pour avoir des exemples.
+étendre la sécurité via d'autres mécanismes d'authentification - consultez la catégorie extensions authentification et autorisation pour avoir des exemples.
+Certaines extensions sont maintenues par les développeurs MediaWiki, d'autres sont écrites par des développeurs tiers. De ce fait, un certain nombre d'entre elles contiennent des bogues et la compatibilité entre extensions n'est pas garantie. Certaines ne sont pas maintenues : toutes les extensions ne fonctionnent pas sur toutes les versions de MediaWiki. L'utilisation de toute extension, notamment celles qui sont marquées comme dangereuses, se fera à vos risques et périls. Lorsque l'utilisation d'une extension réclame d'ajouter des patches dans le noyau MediaWiki ou des entrées supplémentaires dans votre(vos) base(s) de données, assurez-vous d'effectuer une sauvegarde de votre base de données et/ou du code noyau MediaWiki de façon à éviter de planter de façon permanente votre wiki.
+
+Navigation dans les extensions[edit | edit source]
+Vous pouvez naviguer dans la catégorie Extensions par catégorie ou Matrice des extensions{{{2}}} pour voir la majeure partie des extensions qui ont été écrites. Pour les informations sur la manière d'installer ces extensions ou bien d'écrire la vôtre, voyez plus bas.
+
+Vérification des extensions installées[edit | edit source]
+Seule une personne disposant d'un accès administration au système de fichiers (et souvent aussi à la base de données) sur un serveur peut installer des extensions pour MediaWiki, mais tous peuvent vérifier quelles extensions sont installées sur une version de MediaWiki en accédant à la page spéciale Spécial:Version. Par exemple, voici la liste des extensions actives sur la Wikipédia francophone.
+
+Installation d'une extension[edit | edit source]
+MediaWiki est prêt à accepter des extensions dès la fin de l'installation. Pour ajouter une extension, suivez ces étapes :
+
+Avant de commencer
+Certaines extensions requièrent un patch. Un bon nombre d'entre elles fournissent aussi des instructions pour les installer via des commandes unix. Vous aurez besoin d'un accès shell (SSH) pour entrer ces commandes énumérées dans les page d'aide de l'extension.
+Téléchargez votre extension.
+Les extensions sont généralement distribuées sous forme de packages modulaires. Elles vont généralement dans leur propre sous-répertoire du dossier IP/extensions/. Une liste des extensions documentées est disponible sur la page Matrice des extensions{{{2}}}, et une liste des extensions stockées sur le répertoire SVN de Wikimedia est disponible à svn:trunk/extensions. Certaines extensions sont disponibles sur ce wiki. Peut-être souhaiteriez-vous automatiser leur copie.
+Des regroupements{{{2}}} (en anglais Bundles) non officiels d'extensions stockées dans la base de connaissance SVN de Wikimedia peuvent être trouvés sur le serveur d'outils. Ces groupements sont en fait des instantanés arbitraires, donc gardez bien en tête qu'ils peuvent contenir une version non fonctionnelle de l'extension (c'est comme si vous la téléchargiez directement depuis le répertoire du développeur).
+Installez votre extension.
+Généralement à la fin du fichier LocalSettings.php, (mais au-dessus de délimiteur de fin de code PHP "?>" s'il est présent), la ligne suivante devrait être ajoutée :
+require_once "$IP/extensions/nom_de_l_extension/nom_de_l_extension.php";
+Cette ligne oblige l'interpréteur PHP à lire le fichier principal de l'extension et donc rendre l'extension accessible via MediaWiki.
+Certaines extensions peuvent être en conflit avec les scripts de maintenance, par exemple si elle accèdent directement à $_SERVER (non recommandé).
+Dans ce cas, elle peuvent être enveloppées avec une condition afin que les scripts de maintenance puissent toujours s'exécuter.
+if (!$wgCommandLineMode) {
+     require_once( "$IP/extensions/nom_de_l_extension/nom_de_l_extension.php" );
+}
+Le script de maintenance importDump.php{{{2}}} ne fonctionnera pas pour toute extension qui nécessite des espaces de nom personnalisés qui est incluse dans la condition ci-dessus comme Extension:Semantic MediaWiki, Extension:Semantic Forms.
+
+Assurez-vous de disposer des permissions adéquates pour les extensions !
+Bien que la procédure d'installation soit suffisante pour la majorité des extensions, d'autres peuvent requérir une installation spécifique, voyez la page de documentation de l'extension pour plus d'informations.
+Si vous souhaitez modifier la configuration des variables dans LocalSettings.php, vous devez impérativement le faire après avoir inclus l'extension. Autrement les valeurs par défaut de l'extension écraseront votre configuration.
+Attention! Attention :	Bien que les déclarations d'extensions puissent être ajoutées n'importe où dans le fichier LocalSettings.php file, il ne faut jamais rien ajouter avant la ligne require_once( "includes/DefaultSettings.php" );. Si vous faites ainsi, cela éliminera la zone de fonctionnement des paramètres d'extension, empêchant l'installation des extensions et rendant probablement impossible l'accès à votre wiki jusqu'à la résolution de la panne !
+Mise à jour d'une extension[edit | edit source]
+Certaines extensions nécessitent une mise à jour lorsque vous mettez à jour MediaWiki tandis que d'autres fonctionnent sur plusieurs versions. Pour mettre à jour une extension :
+
+Téléchargez la nouvelle version de l'extension.
+Remplacez tous les fichiers de l'extension dans le répertoire extension/NomDeLExtension avec les nouveaux fichiers. Ne retirez pas la configuration de l'extension présente dans LocalSettings.php.
+En fonction de l'extension, il se peut que vous ayez à lancer le script de maintenance Update.php{{{2}}}. La majeure partie des extensions mentionneront si le script a besoin ou non d'être exécuté. Malgré tout, le fait de lancer le script update.php même si cela n'est pas nécessaire ne causera aucun dommage, donc, si n'êtes pas certains, ne craignez pas de le lancer. Si vous ne disposez pas d'accès aux lignes de commande, vous pouvez aussi utiliser l'utilitaire de mise à jour web.
+C'est tout ce que vous avez à faire. Dans la plupart des cas, une configuration que vous avez faite dans LocalSettings.php fonctionnera aussi avec la nouvelle version de l'extension.
+Ces instructions couvrent 99% des extensions. Si l'extension spécifique que vous mettez à jour diffère de celles-ci, vous devriez dans ce cas suivre les instructions de cette extension spécifique.
+Suppression d'une extension[edit | edit source]
+Les extensions sont ajoutées grâce à une ligne que l'on place dans LocalSettings.php, qui grosso-modo ressemble à ceci :
+
+require_once('extensions/nom_de_l_extension/nom_de_l_extension.php');
+En fonction de l'extension que vous souhaitez désinstaller, celle-ci peu avoir nécessité quelques manipulations lors de son installation. Pour plus de détails faites un petit tour dans la section dédiée à l'installation d'une extension.
+Supprimez cette ligne et l'extension sera désinstallée. Si vous le souhaitez, vous pouvez (et vous devriez si vous ne souhaitez plus utiliser cette extension à l'avenir) supprimer les fichiers de cette extension dans le répertoire « extensions/ ».
+Peut-être avez-vous d'autres lignes en rapport avec l'extension que vous souhaitez supprimer dans LocalSettings.php. Très certainement, il s'agira de lignes qui donnent à certaines catégories d'utilisateur d'accéder à des pages générées par l'extension. Ces lignes contiennent la variable « $wgGroupPermissions » et mettent en place quelques paramètre ici. Du moment qu'elles concernent des droits qui proviennent de l'extension supprimée, vous pouvez aussi supprimer ces lignes.
+Il se peut aussi que l'extension ait ajouté des colonnes dans votre base de données. Le fichier de mise à jour maintenance update.php les retire quand vous le lancez après avoir bien entendu désinstallé l'extension.
+Développement d'extensions[edit | edit source]
+Ce sujet complexe est développé dans la page manuel Développement d'extensions.
+
+Voir aussi[edit | edit source]
+Matrice des extensions{{{2}}}
+Catégorie:Extensions
+Catégorie:Extensions en attente d'un nouveau garant
+Modèle:Extension
+Manuel sur les fonctions parseur{{{2}}}
+Manuel sur les pages spéciales{{{2}}}
+Manuel sur les extension balise{{{2}}}
+Page projet demande d'extension{{{2}}}
+Page manuel sur la traduction des extensions{{{2}}} - Informations à propos de la traduction d'extensions.
+Catégorie:Extensions MediaWiki sur Meta - en attendant la fin du transfert sur MediaWiki.org.
